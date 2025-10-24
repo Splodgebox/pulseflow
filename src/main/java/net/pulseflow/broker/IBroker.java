@@ -6,6 +6,10 @@ import net.pulseflow.payload.consumer.ConsumerPayload;
 public interface IBroker {
 
     <T> void publish(Message<T> message);
-    void register(ConsumerPayload<?> consumer);
 
+    void subscribe(ConsumerPayload<?> consumer);
+
+    void unsubscribe(ConsumerPayload<?> consumer);
+
+    int getConsumerCount();
 }
