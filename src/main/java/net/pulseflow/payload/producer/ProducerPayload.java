@@ -6,7 +6,6 @@ import net.pulseflow.payload.Payload;
 public interface ProducerPayload<T> extends Payload {
 
     String getSender();
-
     Message<T> toMessage();
 
 }
