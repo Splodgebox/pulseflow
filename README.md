@@ -16,10 +16,12 @@ It’s designed to let producers and consumers communicate seamlessly — no com
 ------------------------------------------------------------
 🧩 Architecture Overview
 ------------------------------------------------------------
+```
 Producer  →  Broker  →  Consumer
    │           │           │
    │  Message  │  routes   │  handle()
    └──────────▶│──────────▶│
+```
 
 - Producer creates a Message<T>
 - Broker routes it to all registered consumers that can handle it
