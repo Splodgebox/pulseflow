@@ -29,6 +29,18 @@ Producer  →  Broker  →  Consumer
 - Consumer processes the message if canHandle() returns true
 
 ------------------------------------------------------------
+Code Examples
+------------------------------------------------------------
+Setting up the broker
+```java
+// Setup normal broker
+SyncBroker broker = Pulseflow.createDefaultBroker();
+
+// Setup a asynchronous broker
+AsyncBroker asyncBroker = Pulseflow.createAsyncBroker();
+```
+
+------------------------------------------------------------
 Future Enhancements
 ------------------------------------------------------------
 - Smart (ML-driven) message filtering
