@@ -39,6 +39,79 @@ SyncBroker broker = Pulseflow.createDefaultBroker();
 // Setup a asynchronous broker
 AsyncBroker asyncBroker = Pulseflow.createAsyncBroker();
 ```
+Create Consumer
+```java
+@Log4j2
+public class Consumer extends BasePayload implements ConsumerPayload<String> {
+    @Override
+    public boolean canHandle(Message<String> message) {
+        return message.getTopic().equalsIgnoreCase("newsletter/tech");
+    }
+
+    @Override
+    public void handleMessage(Message<String> message) {
+        log.info("Received message: {}", message);
+    }
+}
+```
+
+Create Message/Producer
+You can make a generic producer and just make it sign the messages rather than hardcode the message
+```java
+    public Message<String> createMessage() {
+        return Message.<String>builder()
+                .topic("message/tech")
+                .sender("system")
+                .content("Hello World!")
+                .build();
+    }
+
+public class Producer extends BasePayload implements ProducerPayload<String> {
+    @Override
+    public String getSender() {
+        return "system";
+    }
+
+    @Override
+    public Message<String> toMessage() {
+        return Message.<String>builder()
+                .sender(getSender())
+                .topic("message/tech")
+                .content("Hello World!")
+                .build();
+    }
+}
+```
+
+Link it all together
+```java
+
+public class Demo {
+    public static void main(String[] args) {
+        SyncBroker broker = new SyncBroker();
+
+        Message<String> message = Message.<String>builder()
+                .topic("message/tech")
+                .content("Hello World!")
+                .build();
+        
+        broker.subscribe(new Consumer());
+        broker.publish(message);
+    }
+}
+```
+
+You can also listen for certain events
+```java
+public interface BrokerListener {
+    void onMessageDispatched(Message<?> message);
+    void onMessageReceived(Message<?> message);
+    void onConsumerSubscribed(ConsumerPayload<?> consumer);
+    void onConsumerUnsubscribed(ConsumerPayload<?> consumer);
+}
+
+broker.addListener(new BrokerListener());
+```
 
 ------------------------------------------------------------
 Future Enhancements
