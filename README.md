@@ -45,7 +45,7 @@ Create Consumer
 public class Consumer extends BasePayload implements ConsumerPayload<String> {
     @Override
     public boolean canHandle(Message<String> message) {
-        return message.getTopic().equalsIgnoreCase("newsletter/tech");
+        return message.getTopic().equalsIgnoreCase("message/tech");
     }
 
     @Override
