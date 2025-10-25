@@ -4,16 +4,21 @@ import lombok.extern.log4j.Log4j2;
 import net.pulseflow.model.Message;
 import net.pulseflow.payload.consumer.ConsumerPayload;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 @Log4j2
 public class SyncBroker implements IBroker {
 
+    protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     protected final List<ConsumerPayload<?>> consumers = new CopyOnWriteArrayList<>();
+
     protected final List<BrokerListener> listeners = new CopyOnWriteArrayList<>();
-    protected final List<Message<?>> queuedMessages = new CopyOnWriteArrayList<>();
+
+    protected final Queue<Message<?>> queuedMessages = new ConcurrentLinkedQueue<>();
     protected boolean paused = false;
 
     @Override
@@ -64,6 +69,16 @@ public class SyncBroker implements IBroker {
     }
 
     @Override
+    public <T> void publishDelayed(Message<T> message, long delay, TimeUnit timeUnit) {
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
+
+        log.debug("Message scheduled: {} (delayed {} {})", message, delay, timeUnit);
+        scheduler.schedule(() -> publish(message), delay, timeUnit);
+    }
+
+    @Override
     public int getConsumerCount() {
         return consumers.size();
     }
@@ -74,8 +89,8 @@ public class SyncBroker implements IBroker {
     }
 
     @Override
-    public List<Message<?>> getQueuedMessages() {
-        return Collections.unmodifiableList(queuedMessages);
+    public Queue<Message<?>> getQueuedMessages() {
+        return new ArrayDeque<>(queuedMessages);
     }
 
     @Override
@@ -86,7 +101,11 @@ public class SyncBroker implements IBroker {
     @Override
     public void resume() {
         paused = false;
-        queuedMessages.forEach(message -> publish(message));
+
+        Message<?> message;
+        while ((message = queuedMessages.poll()) != null) {
+            publish(message);
+        }
     }
 
     public void addListener(BrokerListener listener) {

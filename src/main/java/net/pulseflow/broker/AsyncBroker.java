@@ -11,7 +11,17 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class AsyncBroker extends SyncBroker implements AutoCloseable {
 
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor;
+
+    public AsyncBroker(int threadCount) {
+        super();
+        executor = Executors.newFixedThreadPool(threadCount);
+    }
+
+    public AsyncBroker() {
+        super();
+        executor = Executors.newCachedThreadPool();
+    }
 
     @SuppressWarnings("unchecked")
     @Override
