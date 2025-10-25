@@ -19,5 +19,7 @@ public class Message<T> {
 
     private final String topic;
     private final String sender;
+
+    @NonNull
     private final T content;
 }
